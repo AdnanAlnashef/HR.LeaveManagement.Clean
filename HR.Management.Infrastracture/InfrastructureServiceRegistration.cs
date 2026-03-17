@@ -13,7 +13,7 @@ namespace HR.Management.Infrastructure
 {
     public static class InfrastructureServiceRegistration
     {
-        public static IServiceCollection ConfigureInfrastructureServices(this IServiceCollection services, 
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, 
             IConfiguration configuration)
         {
             services.Configure<EmailSetting>(configuration.GetSection("EmailSettings"));
