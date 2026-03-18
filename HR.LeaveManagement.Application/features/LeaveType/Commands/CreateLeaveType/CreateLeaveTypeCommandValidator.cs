@@ -20,8 +20,8 @@ namespace HR.LeaveManagement.Application.features.LeaveType.Commands.CreateLeave
                 .MaximumLength(70).WithMessage("{PropertyName} must be fewer than 70 charchrter");
 
             RuleFor(p => p.DefaultDays)
-                .GreaterThan(100).WithMessage("{PropertyName} cannot exceed 100")
-                .LessThan(1).WithMessage("{PropertyName} cannot be less than 1");
+                .LessThan(100).WithMessage("{PropertyName} cannot exceed 100")
+                .GreaterThan(1).WithMessage("{PropertyName} cannot be less than 1");
 
             RuleFor(q => q)
                 .MustAsync(LeaveTypeNameUnique)
@@ -32,7 +32,7 @@ namespace HR.LeaveManagement.Application.features.LeaveType.Commands.CreateLeave
 
         private async Task<bool> LeaveTypeNameUnique(CreateLeaveTypeCommand command, CancellationToken token)
         {
-            return await _leaveTypeRepository.IsLeaveTypeUniqe(command.Name);
+            return await _leaveTypeRepository.IsLeaveTypeUniqe(command.Name) == false;
         }
     }
 }

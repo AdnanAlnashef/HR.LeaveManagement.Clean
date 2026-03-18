@@ -30,7 +30,7 @@ namespace HR.Management.Persistence.Repositories
                                             && q.Period == period);
         }
 
-        public async Task<List<LeaveAllocation>> GetAllocationsWithDatails(string userId)
+        public async Task<List<LeaveAllocation>> GetAllocationsWithDetails(string userId)
         {
             var leaveAllocations = await _context.LeaveAllocations.Where(q => q.EmployeeId == userId)
                 .Include(q => q.LeaveType)
