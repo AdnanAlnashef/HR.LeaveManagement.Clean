@@ -1,49 +1,42 @@
-﻿using HR.LeaveManagement.BlazorUI.Contracts;
+﻿using System.Runtime.CompilerServices;
+using System.Xml.Serialization;
+using HR.LeaveManagement.BlazorUI.Contracts;
 using HR.LeaveManagement.BlazorUI.Models.LeaveTypes;
+using HR.LeaveManagement.BlazorUI.Providers;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace HR.LeaveManagement.BlazorUI.Pages.LeaveTypes
 {
     public partial class Index
     {
         [Inject]
+        public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+        [Inject]
         public NavigationManager NavigationManager { get; set; }
 
         [Inject]
-        public ILeaveTypeService LeaveTypeService { get; set; }
-        public List<LeaveTypeVM> LeaveTypes { get; set; }
-        public string Message { get; set; } = string.Empty;
-        protected void CreateLeaveType()
-        {
-            NavigationManager.NavigateTo("/leavetypes/create/");
-        }
-        protected void AllocateLeaveType(int id)
-        {
+        public IAuthenticationService AuthenticationService { get; set; }
 
-        }
-        protected void EditLeaveType(int id)
+        protected async override Task OnInitializedAsync()
         {
-            NavigationManager.NavigateTo($"/leavetypes/edit/{id}");
+            await ((ApiAuthenticationStateProvider)
+                AuthenticationStateProvider).GetAuthenticationStateAsync();
         }
-        protected void DetailsLeaveType(int id)
+
+        protected void GoToLogin()
         {
-            NavigationManager.NavigateTo($"/leavetypes/details/{id}");
+            NavigationManager.NavigateTo("login");
         }
-        protected async Task DeleteLeaveType(int id)
+
+        protected void GoToRegister()
         {
-            var response = await LeaveTypeService.DeleteLeaveType(id);
-            if (response.Success)
-            {
-                StateHasChanged();
-            }
-            else
-            {
-                Message = response.Message;
-            }
+            NavigationManager.NavigateTo("register/");
         }
-        protected override async Task OnInitializedAsync()
+
+        public async Task Logout()
         {
-            LeaveTypes = await LeaveTypeService.GetLeaveTypes();
+            await AuthenticationService.Logout();
         }
     }
 }
