@@ -16,11 +16,14 @@ namespace HR.LeaveManagement.Application.features.LeaveRequest.Commands.CancelLe
     {
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly IEmailSender _emailSender;
+        private readonly ILeaveAllocationRepository _leaveAllocationRepository;
 
-        public CancelLeaveRequestCommandHandler(ILeaveRequestRepository leaveRequestRepository, IEmailSender emailSender)
+        public CancelLeaveRequestCommandHandler(ILeaveRequestRepository leaveRequestRepository, 
+            IEmailSender emailSender, ILeaveAllocationRepository leaveAllocationRepository)
         {
             _leaveRequestRepository = leaveRequestRepository;
             _emailSender = emailSender;
+            _leaveAllocationRepository = leaveAllocationRepository;
         }
 
         public async Task<Unit> Handle(CancelLeaveRequestCommand request, CancellationToken cancellationToken)
@@ -32,6 +35,16 @@ namespace HR.LeaveManagement.Application.features.LeaveRequest.Commands.CancelLe
             }
 
             leaveRequest.Cancelled = true;
+            await _leaveRequestRepository.UpdateAsync(leaveRequest);
+
+            if (leaveRequest.Approved == true)
+            {
+                int daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
+                var allocation = await _leaveAllocationRepository.GetUserAllocation
+                    (leaveRequest.RequestingEmployeeId, leaveRequest.LeaveTypeId);
+                allocation.NumberOfDay += daysRequested;
+                await _leaveAllocationRepository.UpdateAsync(allocation);
+            }
 
             var email = new EmailMessage
             {

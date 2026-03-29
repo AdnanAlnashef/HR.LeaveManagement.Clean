@@ -18,14 +18,16 @@ namespace HR.LeaveManagement.Application.features.LeaveRequest.Commands.ChangeLe
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly IMapper _mapper;
         private readonly IEmailSender _emailSender;
+        private readonly ILeaveAllocationRepository _leaveAllocationRepository;
 
         public ChangeLeaveRequestCommandHandler(ILeaveRequestRepository leaveRequestRepository, 
-            IMapper mapper, IEmailSender emailSender, ILeaveTypeRepository leaveTypeRepository)
+            IMapper mapper, IEmailSender emailSender, ILeaveTypeRepository leaveTypeRepository, ILeaveAllocationRepository leaveAllocationRepository)
         {
             _leaveRequestRepository = leaveRequestRepository;
             _mapper = mapper;
             _emailSender = emailSender;
             _leaveTypeRepository = leaveTypeRepository;
+            _leaveAllocationRepository = leaveAllocationRepository;
         }
 
         public async Task<Unit> Handle(ChangeLeaveRequestApprovalCommand request, CancellationToken cancellationToken)
@@ -36,6 +38,16 @@ namespace HR.LeaveManagement.Application.features.LeaveRequest.Commands.ChangeLe
 
             leaveRequest.Approved = request.Approved;
             await _leaveRequestRepository.UpdateAsync(leaveRequest);
+
+            //if request is approved, get and update the employees allocations
+            if (request.Approved)
+            {
+                var daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
+                var allocation = await _leaveAllocationRepository.GetUserAllocation
+                    (leaveRequest.RequestingEmployeeId, leaveRequest.LeaveTypeId);
+                allocation.NumberOfDay -= daysRequested;
+                await _leaveAllocationRepository.UpdateAsync(allocation);
+            }
 
             var email = new EmailMessage
             {

@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
+using Blazored.Toast.Services;
 using HR.LeaveManagement.BlazorUI.Contracts;
 using HR.LeaveManagement.BlazorUI.Models.LeaveTypes;
 using HR.LeaveManagement.BlazorUI.Providers;
@@ -12,6 +13,8 @@ namespace HR.LeaveManagement.BlazorUI.Pages.LeaveTypes
     {
         [Inject]
         public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+        [Inject]
+        public IToastService toastService { get; set; }
         [Inject]
         public NavigationManager NavigationManager { get; set; }
 

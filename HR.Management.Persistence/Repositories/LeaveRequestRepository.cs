@@ -20,6 +20,7 @@ namespace HR.Management.Persistence.Repositories
         public async Task<List<LeaveRequest>> GetLeaveRequestsWithDetails()
         {
             var leaveRequests = await _context.LeaveRequests
+                .Where(q => !string.IsNullOrEmpty(q.RequestingEmployeeId))
                 .Include(q => q.LeaveType)
                 .ToListAsync();
             return leaveRequests;
